@@ -174,7 +174,9 @@ void RosThread::run()
 
 
     dronepose_sub	   = nh_.subscribe(nh_.resolveName("ardrone/predictedPose"),50, &RosThread::droneposeCb, this);
-    navdata_sub	   = nh_.subscribe(nh_.resolveName("ardrone/navdata"),50, &RosThread::navdataCb, this);
+		//SUREKA: Changing the subscription from /ardrone/navdata to tum_ardrone/navdata for the mqtt bridge
+    //navdata_sub	   = nh_.subscribe(nh_.resolveName("ardrone/navdata"),50, &RosThread::navdataCb, this);
+    navdata_sub	   = nh_.subscribe(nh_.resolveName("tum_ardrone/navdata"),50, &RosThread::navdataCb, this);
     joy_sub	   = nh_.subscribe(nh_.resolveName("joy"),50, &RosThread::joyCb, this);
 
     takeoff_pub	   = nh_.advertise<std_msgs::Empty>(nh_.resolveName("ardrone/takeoff"),1);

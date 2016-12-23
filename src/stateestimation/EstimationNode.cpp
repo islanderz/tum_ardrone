@@ -51,10 +51,13 @@ pthread_mutex_t EstimationNode::logPTAMRaw_CS = PTHREAD_MUTEX_INITIALIZER;
 
 EstimationNode::EstimationNode()
 {
-    navdata_channel = nh_.resolveName("ardrone/navdata");
+    //SUREKA: Changing the subscription details because of the mqtt bridge
+		//navdata_channel = nh_.resolveName("ardrone/navdata");
+    navdata_channel = nh_.resolveName("tum_ardrone/navdata");
     control_channel = nh_.resolveName("cmd_vel");
     output_channel = nh_.resolveName("ardrone/predictedPose");
-    video_channel = nh_.resolveName("ardrone/image_raw");
+    //video_channel = nh_.resolveName("ardrone/image_raw");
+    video_channel = nh_.resolveName("tum_ardrone/image");
     command_channel = nh_.resolveName("tum_ardrone/com");
 	packagePath = ros::package::getPath("tum_ardrone");
 
