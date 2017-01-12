@@ -769,13 +769,20 @@ void DroneKalmanFilter::predictUpTo(int timestamp, bool consume, bool useControl
 			if(node->logfileFilter != NULL)
 			{
 				pthread_mutex_lock(&(node->logFilter_CS));
-				(*(node->logfileFilter)) << predictdUpToTimestamp << " " << 0 << " " << 0 << " " << 0 << " " <<
-					0 << " " << 0 << " " << 0 << " " <<
-					controlIterator->twist.linear.y << " " << controlIterator->twist.linear.x << " " << controlIterator->twist.linear.z << " " << controlIterator->twist.angular.z << " " <<
-					(observedRPY ? rpyIterator->rotX : -1) << " " << (observedRPY ? rpyIterator->rotY : -1) << " " << (observedRPY ? lastdYaw : -1) << " " <<
-					(observedXYZ ? xyzIterator->vx : -1) << " " << (observedXYZ ? xyzIterator->vy : -1) << " " << (observedXYZ ? lastdZ : -1) << " " <<
-					x.state[0] << " " << y.state[0] << " " << z.state[0] << " " << roll.state << " " << pitch.state << " " << yaw.state[0] << " " << x.state[1] << " " << y.state[1] << " " << z.state[1] << " " << yaw.state[1] << " " <<
-					lastVXGain << " " << lastVYGain << " " << "\n";
+				(*(node->logfileFilter)) << predictdUpToTimestamp << " "  // A
+					<< 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " "  // B - G
+					<< controlIterator->twist.linear.y << " " << controlIterator->twist.linear.x << " " << controlIterator->twist.linear.z << " " // H - I - J
+					<< controlIterator->twist.angular.z << " "  // K
+					<< (observedRPY ? rpyIterator->rotX : -1) << " " // L
+					<< (observedRPY ? rpyIterator->rotY : -1) << " " // M
+					<< (observedRPY ? lastdYaw : -1) << " "			 // N
+					<< (observedXYZ ? xyzIterator->vx : -1) << " "	 // O
+					<< (observedXYZ ? xyzIterator->vy : -1) << " "	 // P
+					<< (observedXYZ ? lastdZ : -1) << " "			 // Q
+					<< x.state[0] << " " << y.state[0] << " " << z.state[0] << " "  	// R - S - T
+					<< roll.state << " " << pitch.state << " " << yaw.state[0] << " "   // U - V - W
+					<< x.state[1] << " " << y.state[1] << " " << z.state[1] << " " << yaw.state[1] << " " // X - Y - Z - AA
+					<< lastVXGain << " " << lastVYGain << " " << "\n";	// AB - AC
 				pthread_mutex_unlock(&(node->logFilter_CS));
 			}
 		}
