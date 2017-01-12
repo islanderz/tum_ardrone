@@ -691,16 +691,29 @@ void PTAMWrapper::HandleFrame()
 		// - predictedPoseSpeed estimated for lastNfoTimestamp+filter->delayControl	(actually predicting)
 		// - predictedPoseSpeedATLASTNFO estimated for lastNfoTimestamp	(using imu only)
 		if(node->logfilePTAM != NULL)
-			(*(node->logfilePTAM)) << (isGood ? (isVeryGood ? 2 : 1) : 0) << " " <<
-				(mimFrameTime_workingCopy-filter->delayVideo) << " " << filterPosePrePTAM[0] << " " << filterPosePrePTAM[1] << " " << filterPosePrePTAM[2] << " " << filterPosePrePTAM[3] << " " << filterPosePrePTAM[4] << " " << filterPosePrePTAM[5] << " " << filterPosePrePTAM[6] << " " << filterPosePrePTAM[7] << " " << filterPosePrePTAM[8] << " " << filterPosePrePTAM[9] << " " <<
-				filterPosePostPTAM[0] << " " << filterPosePostPTAM[1] << " " << filterPosePostPTAM[2] << " " << filterPosePostPTAM[3] << " " << filterPosePostPTAM[4] << " " << filterPosePostPTAM[5] << " " << filterPosePostPTAM[6] << " " << filterPosePostPTAM[7] << " " << filterPosePostPTAM[8] << " " << filterPosePostPTAM[9] << " " << 
-				PTAMResultTransformed[0] << " " << PTAMResultTransformed[1] << " " << PTAMResultTransformed[2] << " " << PTAMResultTransformed[3] << " " << PTAMResultTransformed[4] << " " << PTAMResultTransformed[5] << " " << 
-				scales[0] << " " << scales[1] << " " << scales[2] << " " << 
-				offsets[0] << " " << offsets[1] << " " << offsets[2] << " " << offsets[3] << " " << offsets[4] << " " << offsets[5] << " " <<
-				sums[0] << " " << sums[1] << " " << sums[2] << " " << 
-				PTAMResult[0] << " " << PTAMResult[1] << " " << PTAMResult[2] << " " << PTAMResult[3] << " " << PTAMResult[4] << " " << PTAMResult[5] << " " <<
-				PTAMResultSE3TwistOrg[0] << " " << PTAMResultSE3TwistOrg[1] << " " << PTAMResultSE3TwistOrg[2] << " " << PTAMResultSE3TwistOrg[3] << " " << PTAMResultSE3TwistOrg[4] << " " << PTAMResultSE3TwistOrg[5] << " " <<
-				videoFramePing << " " << mimFrameTimeRos_workingCopy << " " << mimFrameSEQ_workingCopy << std::endl;
+			(*(node->logfilePTAM))
+			<< (isGood ? (isVeryGood ? 2 : 1) : 0) << " "
+			<< (mimFrameTime_workingCopy-filter->delayVideo) << " "
+			<< filterPosePrePTAM[0] << " " << filterPosePrePTAM[1] << " " << filterPosePrePTAM[2] << " " // x, y. z
+			<< filterPosePrePTAM[3] << " " << filterPosePrePTAM[4] << " " << filterPosePrePTAM[5] << " " // r, p, y
+			<< filterPosePrePTAM[6] << " " << filterPosePrePTAM[7] << " " << filterPosePrePTAM[8] << " "
+			<< filterPosePrePTAM[9] << " "
+			<< filterPosePostPTAM[0] << " " << filterPosePostPTAM[1] << " " << filterPosePostPTAM[2] << " "
+			<< filterPosePostPTAM[3] << " " << filterPosePostPTAM[4] << " " << filterPosePostPTAM[5] << " "
+			<< filterPosePostPTAM[6] << " " << filterPosePostPTAM[7] << " " << filterPosePostPTAM[8] << " "
+			<< filterPosePostPTAM[9] << " "
+			<< PTAMResultTransformed[0] << " " << PTAMResultTransformed[1] << " " << PTAMResultTransformed[2] << " "
+			<< PTAMResultTransformed[3] << " " << PTAMResultTransformed[4] << " " << PTAMResultTransformed[5] << " "
+			<< scales[0] << " " << scales[1] << " " << scales[2] << " "
+			<< offsets[0] << " " << offsets[1] << " " << offsets[2] << " "
+			<< offsets[3] << " " << offsets[4] << " " << offsets[5] << " "
+			<< sums[0] << " " << sums[1] << " " << sums[2] << " "
+			<< PTAMResult[0] << " " << PTAMResult[1] << " " << PTAMResult[2] << " "
+			<< PTAMResult[3] << " " << PTAMResult[4] << " " << PTAMResult[5] << " "
+			<< PTAMResultSE3TwistOrg[0] << " " << PTAMResultSE3TwistOrg[1] << " " << PTAMResultSE3TwistOrg[2] << " "
+			<< PTAMResultSE3TwistOrg[3] << " " << PTAMResultSE3TwistOrg[4] << " " << PTAMResultSE3TwistOrg[5] << " "
+			<< videoFramePing << " " << mimFrameTimeRos_workingCopy << " " << mimFrameSEQ_workingCopy
+			<< std::endl;
 
 		pthread_mutex_unlock(&(node->logPTAM_CS));
 	}
