@@ -122,6 +122,27 @@ EstimationNode::~EstimationNode()
 }
 void EstimationNode::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPtr)
 {
+//
+//  std::cout << "BRIDGEDEBUG: " << navdataPtr->batteryPercent << "," <<
+//    navdataPtr->state << "," <<
+//    navdataPtr->pressure << "," <<
+//    navdataPtr->rotX << "," <<
+//    navdataPtr->rotY << "," <<
+//    navdataPtr->rotZ << "," <<
+//    navdataPtr->altd << "," <<
+//    navdataPtr->vx << "," <<
+//    navdataPtr->vy << "," <<
+//    navdataPtr->vz << "," <<
+//    navdataPtr->ax << "," <<
+//    navdataPtr->ay << "," <<
+//    navdataPtr->az << "," <<
+//    navdataPtr->motor1 << "," <<
+//    navdataPtr->motor2 << "," <<
+//    navdataPtr->motor3 << "," <<
+//    navdataPtr->motor4 << "," <<
+//    navdataPtr->tm << std::endl;
+
+
 	lastNavdataReceived = *navdataPtr;
 	if(ros::Time::now() - lastNavdataReceived.header.stamp > ros::Duration(30.0))
 		lastNavdataReceived.header.stamp = ros::Time::now();
@@ -158,6 +179,7 @@ void EstimationNode::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPt
 
 
 	// convert to originally sent drone values (undo ardrone_autonomy changes)
+	// KS: When sent through MQTTT - No need to undo changes
 	lastNavdataReceived.rotZ *= -1;	// yaw inverted
 	lastNavdataReceived.rotY *= -1;	// pitch inverted
 	lastNavdataReceived.vy *= -1;	// yaw inverted
@@ -188,10 +210,14 @@ void EstimationNode::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPt
 		int pingNav = 0, pingVid = 0;
 		pthread_mutex_lock(&logIMU_CS);
 		if(logfileIMU != NULL)
-			(*logfileIMU) << getMS(lastNavdataReceived.header.stamp) << " " << lastNavdataReceived.tm << " " <<
-			lastNavdataReceived.vx << " " << lastNavdataReceived.vy << " " << lastNavdataReceived.altd << " " << lastNavdataReceived.rotX/1000.0 << " " << lastNavdataReceived.rotY/1000.0 << " " << lastNavdataReceived.rotZ/1000.0 << " " <<
-			lastNavdataReceived.pressure << " " <<  0 << " " <<  0 << " " << 0 << " " <<	// control: roll pitch gaz yaw.
-			pingNav << " " << pingVid << "\n";
+			(*logfileIMU) << getMS(lastNavdataReceived.header.stamp) << " "   // A
+			<< lastNavdataReceived.tm << " "								  // B
+			<< lastNavdataReceived.vx << " " << lastNavdataReceived.vy << " " // C, D
+			<< lastNavdataReceived.altd << " "								  // E
+			<< lastNavdataReceived.rotX/1000.0 << " " << lastNavdataReceived.rotY/1000.0 << " " << lastNavdataReceived.rotZ/1000.0 << " "  // F - G - H
+			<< lastNavdataReceived.pressure // I
+			<< " " <<  0 << " " <<  0 << " " << 0 << " " // control: roll pitch gaz yaw.
+			<< pingNav << " " << pingVid << "\n";
 		pthread_mutex_unlock(&logIMU_CS);
 	}
 
@@ -383,8 +409,11 @@ void EstimationNode::publishTf(TooN::SE3<> trans, ros::Time stamp, int seq, std:
 		// - predictedPoseSpeed estimated for lastNfoTimestamp+filter->delayControl	(actually predicting)
 		// - predictedPoseSpeedATLASTNFO estimated for lastNfoTimestamp	(using imu only)
 		if(logfilePTAMRaw != NULL)
-			(*(logfilePTAMRaw)) << seq << " " << stamp << " " << tr.getOrigin().x() << " " << tr.getOrigin().y() << " " << tr.getOrigin().z() << " " <<
-			tr.getRotation().x() << " " << tr.getRotation().y() << " " << tr.getRotation().z() << " " << tr.getRotation().w() << std::endl;
+			(*(logfilePTAMRaw))
+			<< seq << " " << stamp << " "
+			<< tr.getOrigin().x() << " " << tr.getOrigin().y() << " " << tr.getOrigin().z() << " "
+			<< tr.getRotation().x() << " " << tr.getRotation().y() << " " << tr.getRotation().z() << " "
+			<< tr.getRotation().w() << std::endl;
 
 		pthread_mutex_unlock(&(logPTAMRaw_CS));
 	}
