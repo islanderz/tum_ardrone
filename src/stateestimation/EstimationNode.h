@@ -33,6 +33,7 @@
 #include "ardrone_autonomy/Navdata.h"
 #include "tum_ardrone/filter_state.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Float32MultiArray.h"
 #include <dynamic_reconfigure/server.h>
 #include "tum_ardrone/StateestimationParamsConfig.h"
 #include "TooN/se3.h"
@@ -50,6 +51,8 @@ private:
 	ros::Subscriber vel_sub; // to co-read contro commands sent from other thread
 	ros::Subscriber vid_sub;
 	ros::Time lastNavStamp;
+
+  ros::Subscriber mqtt_bridge_sub;
 
 
 	// comm with ptam
@@ -107,6 +110,7 @@ public:
 	void vidCb(const sensor_msgs::ImageConstPtr img);
 	void comCb(const std_msgs::StringConstPtr str);
 	void dynConfCb(tum_ardrone::StateestimationParamsConfig &config, uint32_t level);
+  void mqtt_bridgeCb(const std_msgs::Float32MultiArray::ConstPtr& flt);
 
 	// main pose-estimation loop
 	void Loop();
@@ -134,6 +138,7 @@ public:
 	void toogleLogging();	// switches logging on or off.
 	std::string calibFile;
 	int arDroneVersion;
+  bool useMqttPing;
 
 
 };

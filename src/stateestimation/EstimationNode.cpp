@@ -53,12 +53,20 @@ EstimationNode::EstimationNode()
 {
     //SUREKA: Changing the subscription details because of the mqtt bridge
 		//navdata_channel = nh_.resolveName("ardrone/navdata");
-    navdata_channel = nh_.resolveName("tum_ardrone/navdata");
+  useMqttPing = false;  
+ 
+  useMqttPing = ros::param::get("/drone_stateestimation/useMqttPing",useMqttPing);
+  std::cout << "UseMqttPing Set to: " << (useMqttPing) << std::endl;
+  navdata_channel = nh_.resolveName("tum_ardrone/navdata");
     control_channel = nh_.resolveName("cmd_vel");
     output_channel = nh_.resolveName("ardrone/predictedPose");
     //video_channel = nh_.resolveName("ardrone/image_raw");
     video_channel = nh_.resolveName("tum_ardrone/image");
     command_channel = nh_.resolveName("tum_ardrone/com");
+
+  std::string mqtt_bridge_channel = "/mqtt_bridge/pings";
+ // mqtt_bridge_channel = nh_.resolveName("tum_ardrone/mqtt_bridge_channel");
+
 	packagePath = ros::package::getPath("tum_ardrone");
 
 	std::string val;
@@ -92,6 +100,8 @@ EstimationNode::EstimationNode()
 	tum_ardrone_pub	   = nh_.advertise<std_msgs::String>(command_channel,50);
 	tum_ardrone_sub	   = nh_.subscribe(command_channel,50, &EstimationNode::comCb, this);
 
+  mqtt_bridge_sub = nh_.subscribe(mqtt_bridge_channel,10, &EstimationNode::mqtt_bridgeCb, this);
+
 	//tf_broadcaster();
 
 	// other internal vars
@@ -119,6 +129,27 @@ EstimationNode::~EstimationNode()
 
 
 	//delete infoQueue;
+}
+void EstimationNode::mqtt_bridgeCb(const std_msgs::Float32MultiArray::ConstPtr& flt)
+{
+  if(flt->data.size() == 2)
+  {
+
+    unsigned int p500 = (unsigned int)flt->data[0];
+    unsigned int p20000 = (unsigned int)flt->data[1];
+
+    if(useMqttPing)
+    {
+      filter->setPing(p500, p20000);
+      predTime = ros::Duration((0.001*filter->delayControl));	// set predTime to new delayControl
+
+      std::cout << "set ping: " << p500 << " and " << p20000 << std::endl;
+    }
+  }
+  else
+  {
+    std::cout << "set ping error since size isn't 2\n";
+  }
 }
 void EstimationNode::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPtr)
 {
@@ -271,13 +302,15 @@ void EstimationNode::comCb(const std_msgs::StringConstPtr str)
 
 
 
-
-	int a, b;
-	if(sscanf(str->data.c_str(),"pings %d %d",&a, &b) == 2)
-	{
-		filter->setPing((unsigned int)a, (unsigned int)b);
-		predTime = ros::Duration((0.001*filter->delayControl));	// set predTime to new delayControl
-	}
+  if(!useMqttPing)
+  {
+    int a, b;
+    if(sscanf(str->data.c_str(),"pings %d %d",&a, &b) == 2)
+    {
+      filter->setPing((unsigned int)a, (unsigned int)b);
+      predTime = ros::Duration((0.001*filter->delayControl));	// set predTime to new delayControl
+    }
+  }
 }
 
 
