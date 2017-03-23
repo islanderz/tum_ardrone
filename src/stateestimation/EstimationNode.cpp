@@ -53,10 +53,13 @@ EstimationNode::EstimationNode()
 {
     //SUREKA: Changing the subscription details because of the mqtt bridge
 		//navdata_channel = nh_.resolveName("ardrone/navdata");
+  
+  //Reading the MqttPing Flag from the launch file
   useMqttPing = false;  
- 
   useMqttPing = ros::param::get("/drone_stateestimation/useMqttPing",useMqttPing);
   std::cout << "UseMqttPing Set to: " << (useMqttPing) << std::endl;
+
+  
   navdata_channel = nh_.resolveName("tum_ardrone/navdata");
     control_channel = nh_.resolveName("cmd_vel");
     output_channel = nh_.resolveName("ardrone/predictedPose");
@@ -100,6 +103,9 @@ EstimationNode::EstimationNode()
 	tum_ardrone_pub	   = nh_.advertise<std_msgs::String>(command_channel,50);
 	tum_ardrone_sub	   = nh_.subscribe(command_channel,50, &EstimationNode::comCb, this);
 
+
+  //This is the callback function when a message is received which contains the delays. 
+  //It is sent from the mqttPingRequester class
   mqtt_bridge_sub = nh_.subscribe(mqtt_bridge_channel,10, &EstimationNode::mqtt_bridgeCb, this);
 
 	//tf_broadcaster();
@@ -130,14 +136,17 @@ EstimationNode::~EstimationNode()
 
 	//delete infoQueue;
 }
+
+//Callback when an Mqtt delay message is received
 void EstimationNode::mqtt_bridgeCb(const std_msgs::Float32MultiArray::ConstPtr& flt)
 {
+  //On the sending side, we are adding 2 values (p500, p20000) to the message.
   if(flt->data.size() == 2)
   {
-
     unsigned int p500 = (unsigned int)flt->data[0];
     unsigned int p20000 = (unsigned int)flt->data[1];
 
+    //the Pings are updated in the Kalmat filter if the useMqttPing flag is on.
     if(useMqttPing)
     {
       filter->setPing(p500, p20000);
@@ -299,8 +308,9 @@ void EstimationNode::comCb(const std_msgs::StringConstPtr str)
 		this->toogleLogging();
 	}
 
-
-
+  //This is the original code for setting the ping values inside the Kalman filter
+  //By putting an if condition and executing the code only if the useMqttPing flag is 
+  //not being used, we use this value without mqtt - as in the original code.
 
   if(!useMqttPing)
   {
